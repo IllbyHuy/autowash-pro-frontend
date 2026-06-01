@@ -1,0 +1,14 @@
+.scroll-float {
+  overflow: hidden;
+}
+
+.scroll-float-text {
+  display: inline-block;
+  /* Font size sẽ được ghi đè bằng Tailwind class bạn truyền vào */
+  line-height: 1.1;
+}
+
+.char {
+  display: inline-block;
+  will-change: opacity, transform;
+}

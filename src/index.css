@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+/* Thêm vào index.css hoặc file CSS của bạn */
+video, .sticky-container {
+  will-change: transform, opacity;
+  transform: translateZ(0); /* Kích hoạt tăng tốc phần cứng (Hardware Acceleration) */
+}
+
+video {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
