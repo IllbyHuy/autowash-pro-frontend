@@ -1,12 +1,68 @@
+import { useEffect, useState } from 'react';
 import { Link } from "react-router-dom";
+import axios from 'axios';
 
 export default function Dashboard() {
-  // Mock data mô phỏng DB
-  const profile = { fullName: "Alex Huy", phone: "090.xxxx.xxx", tier: "Gold Member", points: 2450 };
+  const [profile, setProfile] = useState({
+    fullName: "CUSTOMER", 
+    tier: "Standard",
+    points: 0
+  });
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const myUserId = localStorage.getItem("userId");
+        const myEmail = localStorage.getItem("email");
+
+        if (!myUserId) return;
+
+        // Xử lý lấy Tên từ Email (dokhanhhuy01@... -> DOKHANHHUY01)
+        let displayName = "CUSTOMER";
+        if (myEmail) {
+          displayName = myEmail.split('@')[0].toUpperCase();
+        }
+
+        // Gọi API Customer Profiles bằng ID
+        const headers = { Authorization: `Bearer ${token}` };
+        const profileResponse = await axios.get(
+          `https://smart-car-wash-system-be.onrender.com/api/customer-profiles/${myUserId}`, 
+          { headers }
+        );
+
+        let points = 0;
+        let tierId = "Standard";
+        
+        if (profileResponse.data) {
+          points = profileResponse.data.availablePoints || 0;
+          tierId = profileResponse.data.currentTierId ? "Member" : "Standard";
+        }
+
+        setProfile({
+          fullName: displayName,
+          points: points,
+          tier: tierId
+        });
+
+      } catch (error) {
+        console.error("Lỗi lấy thông tin Dashboard:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Mock data mô phỏng DB cho phần Xe và Lịch sử
   const vehicles = [
     { id: 1, plate: "51H-123.45", model: "Porsche 911", type: "Coupe", status: "Clean" },
     { id: 2, plate: "51K-678.90", model: "Mercedes G63", type: "SUV", status: "Needs Wash" }
   ];
+  
   const history = [
     { id: 1, date: "15/05/2026", service: "Premium Detailing", total: "$49", status: "Completed" },
     { id: 2, date: "02/05/2026", service: "Express Wash", total: "$15", status: "Completed" }
@@ -15,11 +71,14 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-[#050505] text-white pt-24 px-6 md:px-12 font-sans">
       <div className="max-w-6xl mx-auto">
+        
         {/* Header Dashboard */}
         <div className="flex justify-between items-end mb-10">
           <div>
-            <h1 className="text-4xl font-black tracking-tighter">HELLO, {profile.fullName.toUpperCase()}</h1>
-            <p className="text-teal-500 font-mono text-sm tracking-widest mt-1">[{profile.tier}] - {profile.points} PTS</p>
+            <h1 className="text-4xl font-black tracking-tighter">HELLO, {profile.fullName}</h1>
+            <p className="text-teal-500 font-mono text-sm tracking-widest mt-1">
+              [{loading ? "..." : profile.tier}] - {loading ? "..." : profile.points} PTS
+            </p>
           </div>
           <Link to="/booking" className="bg-white text-black px-6 py-3 rounded-xl font-bold text-sm hover:bg-teal-400 transition-colors">
             + NEW BOOKING
@@ -43,6 +102,8 @@ export default function Dashboard() {
                   <p className="text-slate-400 text-sm mt-1">{v.model}</p>
                 </div>
               ))}
+              
+              {/* Nút Add Vehicle */}
               <div className="border border-dashed border-white/10 rounded-2xl flex items-center justify-center text-slate-500 hover:text-white hover:border-white/30 transition-all cursor-pointer min-h-[160px]">
                 + Add Vehicle
               </div>
@@ -65,6 +126,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );

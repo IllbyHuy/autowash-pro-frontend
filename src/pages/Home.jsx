@@ -1,8 +1,5 @@
-import { useRef, useLayoutEffect } from "react"; // Thêm useState
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Canvas } from "@react-three/fiber";
-import { useGLTF, Stage, PresentationControls } from "@react-three/drei";
 
 import videoSrc from "../assets/autowash.mp4";
 import CountUp from "../components/CountUp";
@@ -11,26 +8,6 @@ import TrueFocus from "../components/TrueFocus";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Component hiển thị xe 3D
-function CarModel(props) {
-  const { scene } = useGLTF("/car_model.glb");
-  const modelRef = useRef();
-
-  useLayoutEffect(() => {
-    if (!modelRef.current) return;
-    gsap.to(modelRef.current.rotation, {
-      y: Math.PI * 2,
-      scrollTrigger: {
-        trigger: "#section-3d",
-        start: "top bottom",
-        end: "bottom top",
-        scrub: 1,
-      },
-    });
-  }, []);
-
-  return <primitive ref={modelRef} object={scene} scale={1.4} {...props} />;
-}
 
 export default function Home() {
   return (
@@ -238,7 +215,7 @@ export default function Home() {
         </section>
 
         {/* ── SECTION 4: 3D REAL-TIME INSPECTION ────────────────── */}
-        <section
+        {/* <section
           id="section-3d"
           className="relative h-screen w-full bg-black overflow-hidden"
         >
@@ -278,7 +255,7 @@ export default function Home() {
               Vehicle Body Scan: 100% Cleansed
             </h4>
           </div>
-        </section>
+        </section> */}
 
         {/* ── SECTION 5: LIVE PROMOTIONS ────────────────── */}
         <section className="py-40 bg-white text-center border-t border-slate-100">
