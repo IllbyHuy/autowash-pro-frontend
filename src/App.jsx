@@ -18,12 +18,14 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ConfirmEmail from "./pages/ConfirmEmail";
 import CustomerDashboard from "./pages/customer/Dashboard";
+import Booking from './pages/customer/Booking';
 
 // --- PAGES: MANAGER ---
 import ManagerDashboard from "./pages/manager/ManagerDashboard";
 
 // --- PAGES: ADMIN ---
 import AdminDashboard from "./pages/admin/AdminDashboard";
+
 
 function App() {
   return (
@@ -48,6 +50,7 @@ function App() {
           <Route element={<PrivateRoute />}>
             <Route path="dashboard" element={<CustomerDashboard />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="booking" element={<Booking />} />
           </Route>
         </Route>
 
