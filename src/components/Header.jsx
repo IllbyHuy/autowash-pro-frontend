@@ -7,7 +7,7 @@ export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState("Customer");
   const navigate = useNavigate();
-  const location = useLocation(); // Dùng để biết đang ở trang nào
+  const location = useLocation();
 
   // Kiểm tra trạng thái đăng nhập mỗi khi component render
   useEffect(() => {
@@ -16,9 +16,7 @@ export default function Header() {
       setUserRole(localStorage.getItem("role") || "Customer");
     };
 
-    // Lắng nghe tín hiệu
     window.addEventListener("storage", checkAuth);
-    // Gọi lần đầu
     checkAuth();
 
     return () => window.removeEventListener("storage", checkAuth);
@@ -33,11 +31,12 @@ export default function Header() {
         localStorage.removeItem("token");
         localStorage.removeItem("role");
         localStorage.removeItem("email");
-        
+        localStorage.removeItem("userId"); // Cực kỳ quan trọng: Phải xóa sạch userId
+
         window.dispatchEvent(new Event("storage")); // Báo cho toàn app biết
         setIsLoggedIn(false);
         setIsLoading(false);
-        navigate("/"); // Về trang chủ
+        navigate("/login"); // Về thẳng trang Login theo yêu cầu của ông
       } else {
         // --- LOGIN LOGIC ---
         setIsLoading(false);
@@ -46,16 +45,11 @@ export default function Header() {
     }, 1200);
   };
 
-  // Hàm tạo link dựa theo Role
-  const getBasePath = () => {
-    if (userRole === "Admin") return "/admin";
-    if (userRole === "Manager") return "/manager";
-    return ""; // Customer không có tiền tố
-  };
+  // Check xem có phải Admin/Manager không
+  const isAdminOrManager = userRole === "Admin" || userRole === "Manager";
 
-  const basePath = getBasePath();
-  const dashboardLink = `${basePath}/dashboard`;
-  const profileLink = `${basePath}/profile`;
+  // Setup link Dashboard tùy theo role
+  const dashboardLink = isAdminOrManager ? "/admin/dashboard" : "/dashboard";
 
   // Hàm check Active trang hiện tại
   const isActive = (path) => location.pathname === path;
@@ -73,16 +67,31 @@ export default function Header() {
         </Link>
 
         <nav className="hidden md:flex gap-10 text-[11px] font-bold tracking-widest uppercase opacity-80">
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className={`transition-colors hover:text-teal-400 ${isActive("/") ? "text-teal-400 opacity-100" : ""}`}
           >
             Home
           </Link>
-          <a href="#services" className="hover:text-teal-400 transition-colors">
-            Wash Services
-          </a>
-          
+
+          {/* NẾU LÀ KHÁCH HÀNG THÌ MỚI HIỆN WASH SERVICES */}
+          {!isAdminOrManager && (
+            <a
+              href="#services"
+              onClick={(e) => {
+                // NẾU CHƯA ĐĂNG NHẬP:
+                if (!isLoggedIn) {
+                  e.preventDefault(); // Chặn hành động cuộn trang mặc định
+                  navigate("/login"); // Sút thẳng sang trang Login
+                }
+                // NẾU ĐÃ ĐĂNG NHẬP: Bỏ qua if, nó sẽ tự động cuộn xuống #services bình thường
+              }}
+              className="hover:text-teal-400 transition-colors cursor-pointer"
+            >
+              Wash Services
+            </a>
+          )}
+
           {/* Hiện Menu riêng nếu Đã Đăng Nhập */}
           {isLoggedIn && (
             <>
@@ -92,12 +101,16 @@ export default function Header() {
               >
                 Dashboard
               </Link>
-              <Link
-                to={profileLink}
-                className={`transition-colors hover:text-teal-400 ${isActive(profileLink) ? "text-teal-400 opacity-100" : ""}`}
-              >
-                Profile
-              </Link>
+
+              {/* NẾU LÀ ADMIN THÌ GIẤU LUÔN NÚT PROFILE NÀY ĐI */}
+              {!isAdminOrManager && (
+                <Link
+                  to="/profile"
+                  className={`transition-colors hover:text-teal-400 ${isActive("/profile") ? "text-teal-400 opacity-100" : ""}`}
+                >
+                  Profile
+                </Link>
+              )}
             </>
           )}
         </nav>
