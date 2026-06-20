@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { SignalRProvider } from "./contexts/SignalRContext";
 
 // --- LAYOUTS ---
 import MainLayout from "./layouts/MainLayout"; // Cho Customer (Header ngang)
@@ -35,66 +34,64 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 function App() {
   return (
-    <SignalRProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* ==========================================
+    <BrowserRouter>
+      <Routes>
+        {/* ==========================================
             1. LUỒNG CUSTOMER (Dùng MainLayout)
             ========================================== */}
-          <Route path="/" element={<MainLayout />}>
-            <Route index element={<Home />} />
-            <Route path="confirm-email" element={<ConfirmEmail />} />
-            <Route path="terms" element={<TermsOfService />} />
-            <Route path="privacy" element={<PrivacyPolicy />} />
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<Home />} />
+          <Route path="confirm-email" element={<ConfirmEmail />} />
+          <Route path="terms" element={<TermsOfService />} />
+          <Route path="privacy" element={<PrivacyPolicy />} />
 
-            {/* CHỈ NGƯỜI CHƯA ĐĂNG NHẬP MỚI VÀO ĐÂY */}
-            <Route element={<PublicRoute />}>
-              <Route path="login" element={<Login />} />
-              <Route path="register" element={<Register />} />
-            </Route>
-
-            {/* CHỈ CUSTOMER (ĐÃ LOG IN) MỚI VÀO ĐÂY */}
-            <Route element={<PrivateRoute />}>
-              <Route path="dashboard" element={<CustomerDashboard />} />
-              <Route path="profile" element={<Profile />} />
-              <Route path="booking" element={<Booking />} />
-            </Route>
+          {/* CHỈ NGƯỜI CHƯA ĐĂNG NHẬP MỚI VÀO ĐÂY */}
+          <Route element={<PublicRoute />}>
+            <Route path="login" element={<Login />} />
+            <Route path="register" element={<Register />} />
           </Route>
 
-          {/* ==========================================
+          {/* CHỈ CUSTOMER (ĐÃ LOG IN) MỚI VÀO ĐÂY */}
+          <Route element={<PrivateRoute />}>
+            <Route path="dashboard" element={<CustomerDashboard />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="booking" element={<Booking />} />
+          </Route>
+        </Route>
+
+        {/* ==========================================
             2. LUỒNG MANAGER (Dùng ManagerLayout)
             ========================================== */}
-          <Route path="/manager" element={<ManagerRoute />}>
-            <Route element={<ManagerLayout />}>
-              <Route path="dashboard" element={<ManagerDashboard />} />
-              <Route path="profile" element={<Profile />} />
-              {/* Thêm các trang quản lý lịch đặt, dịch vụ của Manager ở đây */}
-            </Route>
+        <Route path="/manager" element={<ManagerRoute />}>
+          <Route element={<ManagerLayout />}>
+            <Route path="dashboard" element={<ManagerDashboard />} />
+            <Route path="profile" element={<Profile />} />
+            {/* Thêm các trang quản lý lịch đặt, dịch vụ của Manager ở đây */}
           </Route>
+        </Route>
 
-          {/* ==========================================
+        {/* ==========================================
             3. LUỒNG ADMIN (Dùng AdminLayout)
             ========================================== */}
-          <Route path="/admin" element={<AdminRoute />}>
-            <Route element={<AdminLayout />}>
-              <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="profile" element={<Profile />} />
-              {/* Đã FIX: Bỏ chữ /admin/ đi vì đang nằm trong Route cha /admin rồi */}
-              <Route path="users" element={<UserManagement />} />
-            </Route>
+        <Route path="/admin" element={<AdminRoute />}>
+          <Route element={<AdminLayout />}>
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="profile" element={<Profile />} />
+            {/* Đã FIX: Bỏ chữ /admin/ đi vì đang nằm trong Route cha /admin rồi */}
+            <Route path="users" element={<UserManagement />} />
           </Route>
+        </Route>
 
-          {/* ==========================================
+        {/* ==========================================
             4. TRANG BÁO LỖI 404 (SỬ DỤNG FUZZY TEXT)
             ========================================== */}
-          {/* Route này dành cho code "navigate('/404')" gọi chủ động */}
-          <Route path="404" element={<NotFound />} />
+        {/* Route này dành cho code "navigate('/404')" gọi chủ động */}
+        <Route path="404" element={<NotFound />} />
 
-          {/* Route này để bắt TẤT CẢ các đường dẫn gõ sai hoặc đi lạc */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </SignalRProvider>
+        {/* Route này để bắt TẤT CẢ các đường dẫn gõ sai hoặc đi lạc */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
