@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // QUAN TRỌNG: Import useNavigate
+import { useNavigate, Link } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import axios from "axios";
@@ -8,7 +8,6 @@ import videoSrc from "../assets/autowash.mp4";
 import CountUp from "../components/CountUp";
 import RotatingText from "../components/RotatingText";
 import TrueFocus from "../components/TrueFocus";
-import { Link } from "react-router-dom";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -31,9 +30,9 @@ export default function Home() {
 
     // Đã đăng nhập
     if (role === "Customer") {
-      navigate(customerPath); // Tùy ngữ cảnh mà qua /booking hoặc /dashboard
+      navigate(customerPath); 
     } else if (role === "Admin" || role === "Manager") {
-      navigate("/admin/dashboard"); // Admin thì bắt về phòng làm việc
+      navigate("/admin/dashboard"); 
     } else {
       navigate("/");
     }
@@ -47,7 +46,7 @@ export default function Home() {
             .get(`https://smart-car-wash-system-be.onrender.com/api/washes`)
             .catch(() => null),
           axios
-            .get(`https://smart-car-wash-system-be.onrender.com/api/tiers`)
+            .get(`https://smart-car-wash-system-be.onrender.com/api/tiers/active`)
             .catch(() => null),
           axios
             .get(`https://smart-car-wash-system-be.onrender.com/api/promotions`)
@@ -65,8 +64,10 @@ export default function Home() {
           const data = Array.isArray(tiersRes.data)
             ? tiersRes.data
             : tiersRes.data.data || [];
-          data.sort((a, b) => a.minPoints - b.minPoints);
-          setTiers(data.slice(0, 3));
+            
+          // ĐÃ FIX: Đổi thành minPointsRequired và lấy TOÀN BỘ data (Không dùng slice nữa)
+          data.sort((a, b) => a.minPointsRequired - b.minPointsRequired);
+          setTiers(data); 
         }
 
         if (promosRes?.data) {
@@ -113,35 +114,51 @@ export default function Home() {
           },
         ];
 
+  // ĐÃ FIX: Khớp chuẩn 100% key với API trả về (minPointsRequired, pointMultiplier, perksDescription)
   const displayTiers =
     tiers.length > 0
       ? tiers
       : [
           {
-            name: "Silver Tier",
-            minPoints: 0,
-            multiplierBonus: 1.0,
-            description: "Hỗ trợ đặt lịch cơ bản.",
+            id: "1",
+            name: "Member",
+            minPointsRequired: 0,
+            pointMultiplier: 1.0,
+            perksDescription: "Hỗ trợ đặt lịch cơ bản.",
           },
           {
-            name: "Gold Tier",
-            minPoints: 500,
-            multiplierBonus: 1.2,
-            description: "Ưu tiên PriorityLevel, quà sinh nhật.",
+            id: "2",
+            name: "Silver",
+            minPointsRequired: 200,
+            pointMultiplier: 1.1,
+            perksDescription: "Ưu tiên xếp hàng.",
           },
           {
-            name: "Platinum VIP",
-            minPoints: 1500,
-            multiplierBonus: 1.5,
-            description: "Phục vụ phòng chờ hạng thương gia.",
+            id: "3",
+            name: "Gold",
+            minPointsRequired: 500,
+            pointMultiplier: 1.2,
+            perksDescription: "Ưu tiên cao.",
+          },
+          {
+            id: "4",
+            name: "Platinum",
+            minPointsRequired: 1000,
+            pointMultiplier: 1.3,
+            perksDescription: "Ưu tiên hạng đầu.",
           },
         ];
 
   const tierColors = [
-    "border-slate-800 bg-slate-900/40 text-slate-300",
-    "border-yellow-500/30 bg-yellow-500/[0.02] text-yellow-500",
-    "border-teal-400/50 bg-teal-400/[0.03] text-teal-400",
-  ];
+    // 0: Member (Xám/Đồng)
+    "border-slate-600/50 bg-slate-800/30 text-slate-400 hover:border-slate-400 hover:shadow-[0_0_20px_rgba(148,163,184,0.15)]",
+    // 1: Silver (Bạc sáng)
+    "border-slate-400/60 bg-slate-400/[0.08] text-slate-200 hover:border-slate-300 hover:shadow-[0_0_30px_rgba(203,213,225,0.2)]",
+    // 2: Gold (Vàng óng)
+    "border-amber-400/60 bg-amber-400/[0.08] text-amber-400 hover:border-amber-400 hover:shadow-[0_0_30px_rgba(251,191,36,0.2)]",
+    // 3: Platinum (Bạch kim - Xanh Neon cực cháy)
+    "border-cyan-400/70 bg-cyan-400/[0.1] text-cyan-300 hover:border-cyan-300 hover:shadow-[0_0_40px_rgba(34,211,238,0.3)]",
+  ];  
 
   return (
     <>
@@ -208,7 +225,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* THÊM ONCLICK DẪN ĐẾN ĐẶT LỊCH */}
             <button
               onClick={() => handleSmartAction("/booking")}
               className="inline-block bg-slate-950 text-white px-8 py-4 rounded-full font-bold text-sm uppercase tracking-wider hover:bg-teal-500 transition-colors shadow-xl"
@@ -221,7 +237,7 @@ export default function Home() {
             {displayServices.map((service, index) => (
               <div
                 key={service.id || index}
-                onClick={() => handleSmartAction("/booking")} // CLICK THẺ DỊCH VỤ CŨNG QUA ĐẶT LỊCH LUÔN
+                onClick={() => handleSmartAction("/booking")} 
                 className="group relative bg-slate-50 border border-slate-100 p-8 rounded-2xl flex justify-between items-center cursor-pointer transition-all duration-300 hover:bg-slate-950 hover:text-white hover:scale-[1.02] hover:shadow-2xl"
               >
                 <div className="max-w-md pr-4">
@@ -280,11 +296,13 @@ export default function Home() {
               point multiplier cực khủng.
             </p>
           </div>
-          <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 px-10">
+
+          <div className="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-10">
+            {/* ĐÃ FIX: Gọi displayTiers thay vì tiers để nếu mạng lag vẫn hiện đủ data mẫu */}
             {displayTiers.map((tier, index) => (
               <div
                 key={tier.id || index}
-                className={`p-8 border rounded-3xl flex flex-col justify-between h-72 transition-all hover:border-teal-400 hover:shadow-[0_0_30px_rgba(45,212,191,0.1)] ${tierColors[index % 3]}`}
+                className={`p-8 border rounded-3xl flex flex-col justify-between h-72 transition-all duration-300 ${tierColors[index % 4]}`}
               >
                 <div>
                   <div className="flex justify-between items-center mb-4">
@@ -292,17 +310,15 @@ export default function Home() {
                       {tier.name}
                     </h3>
                     <span className="px-3 py-1 text-[10px] font-mono font-bold bg-white/10 text-white rounded-full">
-                      x{tier.multiplierBonus || 1.0} PTS
+                      x{tier.pointMultiplier} PTS
                     </span>
                   </div>
                   <p className="text-xs text-slate-300/80 leading-relaxed font-mono mt-4">
-                    {tier.description || "Hưởng đặc quyền theo thứ hạng."}
+                    {tier.perksDescription}
                   </p>
                 </div>
                 <div className="border-t border-white/5 pt-4 flex justify-between items-center text-xs font-mono text-slate-400">
-                  <span>MinPoints: {tier.minPoints}</span>
-
-                  {/* THÊM ONCLICK VÀO VIEW PERKS DẪN QUA DASHBOARD */}
+                  <span>MinPoints: {tier.minPointsRequired}</span>
                   <span
                     onClick={() => handleSmartAction("/dashboard")}
                     className="text-white hover:text-teal-400 cursor-pointer transition-colors"
@@ -315,7 +331,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── SECTION 5: LIVE PROMOTIONS ────────────────── */}
+        {/* ── SECTION 5: LIVE PROMOTIONS (ĐÃ PHỤC HỒI LẠI) ────────────────── */}
         <section className="py-40 bg-white text-center border-t border-slate-100">
           <p className="text-xs font-bold uppercase tracking-[0.4em] text-slate-400 mb-6 font-mono">
             Exclusive Offers
@@ -359,7 +375,6 @@ export default function Home() {
               </p>
             </div>
             <div className="text-center md:text-right">
-              {/* THÊM ONCLICK ĐỂ DẪN TỚI TRANG ĐẶT LỊCH SỬ DỤNG MÃ */}
               <button
                 onClick={() => handleSmartAction("/booking")}
                 className="inline-block w-full md:w-auto bg-teal-400 text-black px-8 py-4 rounded-full font-black text-xs uppercase tracking-wider hover:bg-white hover:scale-105 transition-all"
@@ -376,8 +391,6 @@ export default function Home() {
             <div className="text-7xl font-black italic tracking-tighter opacity-20 text-teal-400">
               AUTOWASH PRO.
             </div>
-
-            {/* ĐÃ CẮT BỎ PRIVACY VÀ TERMS OF USE THEO YÊU CẦU */}
             <div className="flex gap-12 text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em] mb-4">
               <a
                 href="#services"
